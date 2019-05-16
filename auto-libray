@@ -1,0 +1,30 @@
+#!/bin/bash
+#Automatically rip iso from ps3 in blueray drive and decrypt
+
+read -p 'Name of game (no spaces): ' gamename
+
+RIPLOC="./libray"
+RIPLOC_MNT="$RIPLOC/iso-mnt/" #Currently mounted ISO for extracting
+RIPLOC_CNT="$RIPLOC/library/$gamename""_iso"
+RIPLOC_EXT="$RIPLOC/library/$gamename"
+
+mkdir -p $RIPLOC
+mkdir -p $RIPLOC_MNT
+mkdir -p $RIPLOC_CNT
+mkdir -p $RIPLOC_EXT
+
+echo Ripping...
+
+dd if=/dev/sr0 of=$RIPLOC_CNT/$gamename.cln.iso
+
+echo Rip complete. Decrypting...
+
+libray -i $RIPLOC_CNT/$gamename.cln.iso -o $RIPLOC_CNT/$gamename.dec.iso
+
+echo Decrypting complete. Extracting...
+
+sudo mount $RIPLOC_CNT/$gamename.dec.iso $RIPLOC_MNT
+rsync -avh --progress $RIPLOC_MNT. $RIPLOC_EXT
+umount $RIPLOC_MNT
+
+echo Extraction complete. All set.
